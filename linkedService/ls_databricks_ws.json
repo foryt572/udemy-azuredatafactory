@@ -1,0 +1,14 @@
+{
+	"name": "ls_databricks_ws",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-5451294672301762.2.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/7c04ae88-3a10-4b5b-b6b9-1dffd526eec3/resourceGroups/udemy_azuredataengineering_rg/providers/Microsoft.Databricks/workspaces/formula1-premium-ws",
+			"existingClusterId": "0924-044743-dew3nui4"
+		}
+	}
+}

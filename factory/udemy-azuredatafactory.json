@@ -1,0 +1,9 @@
+{
+	"name": "udemy-azuredatafactory",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "4d7b1b92-8537-4067-8fd1-81d8f4214db2",
+		"tenantId": "4ff9f750-9840-4a74-96ac-d12c83b36591"
+	}
+}

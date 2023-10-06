@@ -1,0 +1,20 @@
+{
+	"name": "ds_sql_server_watermarkdb_old_watermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_server_watermark_db",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "sql_to_sql_datasets"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "watermarktable"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,31 @@
+{
+	"name": "ds_sql_server_targetdb",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_server_target_db",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"p_schemaName": {
+				"type": "string"
+			},
+			"p_tableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().p_schemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().p_tableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

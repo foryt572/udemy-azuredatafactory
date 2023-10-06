@@ -1,0 +1,11 @@
+{
+	"name": "ls_udemyadlsgen2acct_adls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://udemyadlsgen2acct.dfs.core.windows.net/"
+		}
+	}
+}

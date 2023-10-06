@@ -1,0 +1,249 @@
+{
+	"name": "migrate_sql_to_sql_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach table info",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.p_table_info",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Old watermark lookup",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT watermark as old_watermark_value FROM dbo.watermarktable WHERE table_name = '@{item().tableName}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_sql_server_watermarkdb_old_watermark",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "New watermark lookup",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT MAX(@{item().waterMarkColumn}) as new_watermark_value FROM @{concat(item().schemaName,'.', item().tableName)}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_sql_server_adventureworks_new_watermark",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_schemaName": {
+											"value": "@item().schemaName",
+											"type": "Expression"
+										},
+										"p_tableName": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							}
+						},
+						{
+							"name": "Copy data from tables",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Old watermark lookup",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "New watermark lookup",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "SELECT * FROM @{concat(item().schemaName, '.', item().tableName)}\nWHERE @{item().waterMarkColumn} > '@{formatDateTime(activity('Old watermark lookup').output.firstRow.old_watermark_value, 'yyyy-MM-ddTHH:mm:ss')}' AND @{item().waterMarkColumn} <= '@{formatDateTime(activity('New watermark lookup').output.firstRow.new_watermark_value, 'yyyy-MM-ddTHH:mm:ss')}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"writeBehavior": "upsert",
+									"upsertSettings": {
+										"useTempDB": true,
+										"keys": {
+											"value": "@item().keyColumn",
+											"type": "Expression"
+										}
+									},
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_incremental_copy_sql_server",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_schemaName": {
+											"value": "@item().schemaName",
+											"type": "Expression"
+										},
+										"p_tableName": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_sql_server_targetdb",
+									"type": "DatasetReference",
+									"parameters": {
+										"p_schemaName": {
+											"value": "@item().schemaName",
+											"type": "Expression"
+										},
+										"p_tableName": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy data from tables",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_write_watermark]",
+								"storedProcedureParameters": {
+									"p_table_name": {
+										"value": {
+											"value": "@item().tableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_watermark": {
+										"value": {
+											"value": "@activity('New watermark lookup').output.firstRow.new_watermark_value",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_sql_server_watermark_db",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_table_info": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"tableName": "Customer",
+						"schemaName": "SalesLT",
+						"keyColumn": [
+							"CustomerID"
+						],
+						"waterMarkColumn": "ModifiedDate"
+					},
+					{
+						"tableName": "Product",
+						"schemaName": "SalesLT",
+						"keyColumn": [
+							"ProductID"
+						],
+						"waterMarkColumn": "ModifiedDate"
+					}
+				]
+			}
+		},
+		"folder": {
+			"name": "sql_to_sql_pipeline"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-06T07:43:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
