@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "udemy-azuredatafactory"
+		},
+		"ls_sql_server_adventureworks_db_connectionString": {
+			"value": ""
+		},
+		"ls_sql_server_target_db_connectionString": {
+			"value": ""
+		},
+		"ls_sql_server_watermark_db_connectionString": {
+			"value": ""
+		},
+		"ls_databricks_ws_properties_typeProperties_existingClusterId": {
+			"value": "0924-044743-dew3nui4"
+		},
+		"ls_udemyadlsgen2acct_adls_properties_typeProperties_url": {
+			"value": "https://udemyadlsgen2acct.dfs.core.windows.net/"
+		},
+		"tr_process_formula1_data_latest_properties_pipeline_parameters_p_window_end_date": {
+			"value": "@trigger().outputs.windowEndTime"
+		}
+	}
+}
