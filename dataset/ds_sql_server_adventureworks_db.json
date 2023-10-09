@@ -1,0 +1,12 @@
+{
+	"name": "ds_sql_server_adventureworks_db",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_server_adventureworks_db",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}
