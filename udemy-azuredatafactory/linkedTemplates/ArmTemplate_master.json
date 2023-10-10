@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_sql_server_watermark_db'"
 		},
+		"ls_sqlserver_sourcedb_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_sqlserver_sourcedb'"
+		},
 		"ls_databricks_ws_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "0924-044743-dew3nui4"
@@ -26,6 +30,14 @@
 		"ls_udemyadlsgen2acct_adls_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://udemyadlsgen2acct.dfs.core.windows.net/"
+		},
+		"sales_tumbling_window_properties_pipeline_parameters_p_startdate": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowStartTime"
+		},
+		"sales_tumbling_window_properties_pipeline_parameters_p_enddate": {
+			"type": "string",
+			"defaultValue": "@trigger().outputs.windowEndTime"
 		},
 		"tr_process_formula1_data_latest_properties_pipeline_parameters_p_window_end_date": {
 			"type": "string",
@@ -67,18 +79,47 @@
 					"ls_sql_server_watermark_db_connectionString": {
 						"value": "[parameters('ls_sql_server_watermark_db_connectionString')]"
 					},
+					"ls_sqlserver_sourcedb_connectionString": {
+						"value": "[parameters('ls_sqlserver_sourcedb_connectionString')]"
+					},
 					"ls_databricks_ws_properties_typeProperties_existingClusterId": {
 						"value": "[parameters('ls_databricks_ws_properties_typeProperties_existingClusterId')]"
 					},
 					"ls_udemyadlsgen2acct_adls_properties_typeProperties_url": {
 						"value": "[parameters('ls_udemyadlsgen2acct_adls_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "udemy-azuredatafactory_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"sales_tumbling_window_properties_pipeline_parameters_p_startdate": {
+						"value": "[parameters('sales_tumbling_window_properties_pipeline_parameters_p_startdate')]"
+					},
+					"sales_tumbling_window_properties_pipeline_parameters_p_enddate": {
+						"value": "[parameters('sales_tumbling_window_properties_pipeline_parameters_p_enddate')]"
 					},
 					"tr_process_formula1_data_latest_properties_pipeline_parameters_p_window_end_date": {
 						"value": "[parameters('tr_process_formula1_data_latest_properties_pipeline_parameters_p_window_end_date')]"
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'udemy-azuredatafactory_ArmTemplate_0')]"
+			]
 		}
 	]
 }
