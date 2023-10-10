@@ -1,0 +1,12 @@
+{
+	"name": "ds_sqlserver_sourcedb_tumbling_window",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sqlserver_sourcedb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}

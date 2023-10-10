@@ -1,0 +1,16 @@
+{
+	"name": "ds_sqlserver_targetdb_tumbling_window",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_server_target_db",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "sales_tumbling"
+		}
+	}
+}

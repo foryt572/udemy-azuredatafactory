@@ -1,0 +1,82 @@
+{
+	"name": "tumbling_window_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderStoredProcedureName": "[dbo].[usp_for_sales_tumbling]",
+						"storedProcedureParameters": {
+							"enddate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.p_enddate",
+									"type": "Expression"
+								}
+							},
+							"startdate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.p_startdate",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_sqlserver_sourcedb_tumbling_window",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_sqlserver_targetdb_tumbling_window",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"parameters": {
+			"p_startdate": {
+				"type": "string"
+			},
+			"p_enddate": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "sql_to_sql_pipeline"
+		},
+		"annotations": []
+	}
+}
